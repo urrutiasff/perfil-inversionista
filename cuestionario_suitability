@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Perfil de Inversionista — Cuestionario de Suitability</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* ---------- Tokens ---------- */
+  :root{
+    --navy:#0E2240;        /* base institucional */
+    --navy-2:#173458;      /* hover / lineas sobre navy */
+    --garnet:#8E1E2F;      /* acento: seleccion, alerta */
+    --ink:#1C1F26;
+    --ink-2:#5B6270;
+    --rule:#D6DBE3;
+    --panel:#F2F4F7;
+    --paper:#FFFFFF;
+    --display:"Libre Caslon Text", Georgia, "Times New Roman", serif;
+    --body:"IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    --mono:"IBM Plex Mono", "Courier New", monospace;
+    --rail:300px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+  button{font:inherit;cursor:pointer}
+  ::selection{background:var(--navy);color:#fff}
+  :focus-visible{outline:2px solid var(--garnet);outline-offset:3px}
+
+  /* ---------- Layout: riel izquierdo + hoja derecha ---------- */
+  .app{display:grid;grid-template-columns:var(--rail) 1fr;min-height:100vh}
+  .rail{background:var(--navy);color:#fff;padding:40px 32px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column}
+  .rail .brand{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#B8C4D6}
+  .rail h1{font-family:var(--display);font-weight:400;font-size:26px;line-height:1.2;margin:14px 0 0}
+  .rail .course{margin-top:10px;font-size:13px;color:#B8C4D6;line-height:1.45}
+  .index{list-style:none;padding:0;margin:44px 0 0;border-top:1px solid var(--navy-2)}
+  .index li{display:grid;grid-template-columns:34px 1fr;gap:10px;padding:12px 0;border-bottom:1px solid var(--navy-2);font-size:14px;color:#8C9BB3;align-items:baseline}
+  .index li code{font-family:var(--mono);font-size:12px;color:#8C9BB3}
+  .index li.done{color:#DCE3ED}
+  .index li.done code{color:#DCE3ED}
+  .index li.active{color:#fff}
+  .index li.active code{color:#fff;position:relative}
+  .index li.active code::before{content:"";position:absolute;left:-32px;top:6px;width:20px;height:2px;background:var(--garnet)}
+  .rail .foot{margin-top:auto;font-size:12px;color:#8C9BB3;line-height:1.5}
+
+  .sheet{padding:56px 72px 96px;max-width:860px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+  .sheet h2{font-family:var(--display);font-weight:400;font-size:38px;line-height:1.15;margin:10px 0 14px}
+  .lede{font-size:17px;color:var(--ink-2);max-width:56ch;margin:0 0 36px}
+
+  /* ---------- Preguntas ---------- */
+  .q{border:0;border-top:1px solid var(--rule);padding:26px 0 8px;margin:0;min-width:0}
+
+  .q:last-of-type{border-bottom:1px solid var(--rule)}
+  .q .code{font-family:var(--mono);font-size:12px;color:var(--ink-2);letter-spacing:.06em}
+  .q .text{font-size:19px;font-weight:500;margin:6px 0 4px;max-width:60ch}
+  .q .hint{font-size:14px;color:var(--ink-2);margin:0 0 14px;max-width:60ch}
+  .opts{display:flex;flex-direction:column;gap:6px;margin:12px 0 14px}
+  .opt{display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start;padding:11px 14px;border:1px solid var(--rule);border-radius:2px;background:var(--paper);transition:border-color .12s,background .12s;cursor:pointer}
+  .opt:hover{border-color:var(--navy)}
+  .opt input{position:absolute;opacity:0;width:1px;height:1px}
+  .opt .k{font-family:var(--mono);font-size:12px;color:var(--ink-2);padding-top:3px}
+  .opt.on{border-color:var(--navy);background:var(--panel)}
+  .opt.on .k{color:var(--garnet);font-weight:500}
+  .q.missing .text::after{content:" — falta responder";color:var(--garnet);font-size:14px;font-weight:400}
+
+  .nav{display:flex;justify-content:space-between;align-items:center;margin-top:40px;gap:16px}
+  .btn{border:1px solid var(--navy);background:var(--navy);color:#fff;padding:13px 26px;border-radius:2px;font-weight:500;letter-spacing:.01em}
+  .btn:hover{background:var(--navy-2)}
+  .btn.ghost{background:transparent;color:var(--navy)}
+  .btn.ghost:hover{background:var(--panel)}
+  .warn{font-size:14px;color:var(--garnet);display:none}
+  .warn.show{display:block}
+
+  /* ---------- Resultado ---------- */
+  .result .eyebrow{color:var(--garnet)}
+  .profile-name{font-family:var(--display);font-size:64px;line-height:1;margin:14px 0 22px;letter-spacing:-.01em}
+  .scale{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--rule);margin:8px 0 34px}
+  .scale div{padding:12px 10px;font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-align:center;border-right:1px solid var(--rule);color:var(--ink-2);position:relative}
+  .scale div:last-child{border-right:0}
+  .scale div.hit{background:var(--navy);color:#fff}
+  .scale div.hit::after{content:"";position:absolute;left:50%;bottom:-7px;width:12px;height:12px;background:var(--navy);transform:translateX(-50%) rotate(45deg)}
+  .marker{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin:0 0 30px}
+  .marker b{color:var(--ink);font-weight:500}
+  .two{display:grid;grid-template-columns:1.25fr 1fr;gap:48px}
+  .desc h3{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 8px}
+  .desc p{margin:0 0 14px;max-width:52ch}
+  .desc ul{margin:0 0 14px;padding-left:18px}
+  .desc li{margin:4px 0}
+  .caution{border-left:3px solid var(--garnet);padding:12px 16px;background:var(--panel);margin:18px 0 0;font-size:15px}
+  .caution b{color:var(--garnet)}
+  .cap{border-left:3px solid var(--navy);padding:12px 16px;background:var(--panel);margin:18px 0 0;font-size:15px}
+  .cap b{color:var(--navy)}
+  .breakdown h4{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--ink-2);margin:0 0 14px}
+  .bar{display:grid;grid-template-columns:150px 1fr 40px;gap:12px;align-items:center;font-size:14px;margin:9px 0}
+  .bar .track{height:6px;background:var(--rule);position:relative}
+  .bar .fill{position:absolute;left:0;top:0;bottom:0;background:var(--navy)}
+  .bar .n{font-family:var(--mono);font-size:12px;text-align:right}
+  .bar .w{color:var(--ink-2);font-family:var(--mono);font-size:11px}
+  .total{border-top:1px solid var(--ink);margin-top:14px;padding-top:12px;display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px}
+  .disclaimer{margin-top:40px;font-size:13px;color:var(--ink-2);max-width:70ch;border-top:1px solid var(--rule);padding-top:18px}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+  @media (max-width:900px){
+    .app{grid-template-columns:1fr}
+    .rail{position:static;height:auto;padding:28px 22px}
+    .index{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;border-top:0;gap:0 18px}
+    .index li{font-size:13px}
+    .index li.active code::before{display:none}
+    .rail .foot{display:none}
+    .sheet{padding:32px 22px 72px}
+    .sheet h2{font-size:30px}
+    .profile-name{font-size:44px}
+    .two{grid-template-columns:1fr;gap:28px}
+    .scale div{font-size:10px;padding:10px 4px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="rail">
+    <div class="brand">Perfil de inversionista</div>
+    <h1>Cuestionario de suitability</h1>
+    <div class="course">Administración de Portafolio Avanzada<br>Escuela de Postgrado · Universidad de Chile</div>
+    <ol class="index" id="index"></ol>
+    <div class="foot">Sus respuestas no se envían a ningún servidor; el perfil se calcula en este mismo navegador.</div>
+  </aside>
+
+  <main class="sheet" id="sheet" aria-live="polite"></main>
+</div>
+
+<script>
+/* =====================================================================
+   1. DIMENSIONES Y PREGUNTAS
+   Cada opción tiene un puntaje. El puntaje de una dimensión se normaliza
+   a 0–100 (puntos obtenidos / puntos máximos) y luego se pondera.
+   ===================================================================== */
+const DIMENSIONS = [
+  { id:"H", name:"Horizonte de inversión",   short:"Horizonte",     weight:0.20,
+    intro:"Cuándo y cuánto necesitará de este dinero. El plazo determina qué activos son admisibles." },
+  { id:"T", name:"Tolerancia al riesgo",     short:"Tolerancia",    weight:0.25,
+    intro:"Su disposición a sostener pérdidas temporales sin abandonar la estrategia." },
+  { id:"C", name:"Capacidad de riesgo",      short:"Capacidad",     weight:0.25,
+    intro:"Su capacidad financiera real de absorber una pérdida. Puede ser distinta de lo que usted estaría dispuesto a tolerar." },
+  { id:"K", name:"Conocimiento financiero",  short:"Conocimiento",  weight:0.05,
+    intro:"Experiencia previa con instrumentos financieros. Es un requisito regulatorio para determinar la idoneidad de una recomendación." },
+  { id:"S", name:"Situación financiera",     short:"Situación",     weight:0.10,
+    intro:"Estabilidad de sus ingresos y etapa de vida. Afecta cuánta liquidez debería conservar el portafolio." },
+  { id:"B", name:"Sesgos de comportamiento", short:"Comportamiento",weight:0.15,
+    intro:"Cómo tiende a decidir frente a ganancias y pérdidas concretas, más allá de lo que declara." },
+];
+
+const QUESTIONS = [
+  /* ---- Horizonte ---- */
+  { id:"H1", dim:"H", ref:true,
+    text:"¿Cuándo necesita disponer de este dinero por primera vez?",
+    opts:[["En menos de 1 año",0],["Entre 1 y 3 años",1],["Entre 3 y 7 años",2],["Entre 7 y 15 años",3],["En más de 15 años",4]] },
+  { id:"H2", dim:"H",
+    text:"¿Planea hacer retiros anuales de este dinero? Si es así, ¿de cuánto?",
+    hint:"Considere el porcentaje del monto invertido que retiraría cada año.",
+    opts:[["No, no planeo retirar hasta el final del plazo",3],["Sí, menos del 5% del monto invertido cada año",2],["Sí, entre 5% y 10% cada año",1],["Sí, más del 10% cada año",0]] },
+  { id:"H3", dim:"H",
+    text:"¿Cuál es el objetivo principal de esta inversión?",
+    opts:[["Proteger el capital para un gasto que ya tengo definido",0],["Generar ingresos periódicos que complementen mis ingresos",1],["Hacer crecer el capital manteniendo un riesgo equilibrado",2],["Maximizar el crecimiento del capital en el largo plazo",3]] },
+
+  /* ---- Tolerancia ---- */
+  { id:"T1", dim:"T", ref:true,
+    text:"Si su portafolio cae un 20% en 3 meses, ¿qué haría?",
+    opts:[["Vendería todo para evitar más pérdidas",0],["Vendería una parte y pasaría el resto a algo más seguro",1],["No haría nada y mantendría la estrategia",2],["Aprovecharía para invertir más a precios más bajos",3]] },
+  { id:"T2", dim:"T",
+    text:"¿Con cuál de estos rangos de resultado anual se sentiría más cómodo?",
+    hint:"Cada opción muestra el peor año y el mejor año que podría tener esa inversión.",
+    opts:[["Peor año: −2% · Mejor año: +6%",0],["Peor año: −10% · Mejor año: +15%",1],["Peor año: −25% · Mejor año: +35%",2],["Peor año: −40% · Mejor año: +60%",3]] },
+
+  /* ---- Capacidad ---- */
+  { id:"C1", dim:"C", ref:true,
+    text:"¿Qué porcentaje de su patrimonio total representa este dinero?",
+    hint:"Patrimonio total: ahorros, inversiones y propiedades, descontando deudas.",
+    opts:[["Más del 75%",0],["Entre 50% y 75%",1],["Entre 25% y 50%",2],["Menos del 25%",3]] },
+  { id:"C2", dim:"C",
+    text:"¿Qué parte de su ingreso mensual piensa depositar en esta inversión?",
+    opts:[["No planeo hacer aportes mensuales",0],["Menos del 10% de mi ingreso",1],["Entre 10% y 20% de mi ingreso",2],["Más del 20% de mi ingreso",3]] },
+  { id:"C3", dim:"C",
+    text:"¿Tiene deudas u obligaciones financieras actualmente?",
+    hint:"Considere créditos de consumo, hipotecarios, tarjetas y pensiones que deba pagar.",
+    opts:[["Sí, y las cuotas superan el 40% de mis ingresos",0],["Sí, las cuotas están entre 20% y 40% de mis ingresos",1],["Sí, pero las cuotas son menos del 20% de mis ingresos",2],["No tengo deudas",3]] },
+  { id:"C4", dim:"C",
+    text:"Aparte de este dinero, ¿cuántos meses de gastos podría cubrir con sus ahorros disponibles?",
+    opts:[["Menos de 1 mes",0],["Entre 1 y 3 meses",1],["Entre 3 y 6 meses",2],["Más de 6 meses",3]] },
+
+  /* ---- Conocimiento ---- */
+  { id:"K1", dim:"K", ref:true,
+    text:"¿Ha invertido en acciones o fondos mutuos en los últimos 3 años?",
+    opts:[["No, nunca he invertido",0],["Solo en depósitos a plazo o fondos de bajo riesgo",1],["Sí, en fondos mutuos o ETF",2],["Sí, en acciones individuales u otros instrumentos (criptomonedas, derivados)",3]] },
+  { id:"K2", dim:"K",
+    text:"¿Qué tan familiarizado está con conceptos como volatilidad, diversificación, renta fija y renta variable?",
+    opts:[["No los conozco",0],["Los he escuchado, pero no podría explicarlos",1],["Los entiendo en términos generales",2],["Los entiendo bien y los uso al tomar decisiones",3]] },
+  { id:"K3", dim:"K",
+    text:"¿Cuál es su nivel de estudios?",
+    opts:[["Enseñanza media o menos",0],["Técnica o universitaria incompleta",1],["Universitaria completa",2],["Postgrado, o formación en economía o finanzas",3]] },
+
+  /* ---- Situación financiera ---- */
+  { id:"S1", dim:"S", ref:true,
+    text:"¿Cuál de estas situaciones describe mejor sus ingresos esperados en los próximos 5 años?",
+    opts:[["Inciertos; podrían bajar",0],["Estables, sin crecimiento",1],["Estables, con crecimiento moderado",2],["En crecimiento claro",3]] },
+  { id:"S2", dim:"S",
+    text:"¿Cuál es su situación laboral actual?",
+    opts:[["Sin empleo o sin ingresos regulares",0],["Independiente, con ingresos variables",1],["Jubilado o pensionado, con pensión estable",2],["Empleado con contrato indefinido",3]] },
+  { id:"S3", dim:"S",
+    text:"¿Cuál es su edad?",
+    opts:[["Más de 60 años",0],["Entre 46 y 60 años",1],["Entre 31 y 45 años",2],["30 años o menos",3]] },
+
+  /* ---- Comportamiento ---- */
+  { id:"B1", dim:"B", ref:true,
+    text:"“Prefiero una inversión que puede generar $2.000.000 o cero, antes que una que asegura $800.000.”",
+    hint:"Indique qué tan de acuerdo está con la frase.",
+    opts:[["Falso: prefiero los $800.000 seguros",0],["Depende; me costaría decidir",1],["Verdadero: prefiero la posibilidad de ganar $2.000.000",2]] },
+  { id:"B2", dim:"B",
+    text:"Si una de sus inversiones acumula pérdidas durante varios meses, ¿cómo reaccionaría?",
+    opts:[["La vendo de inmediato",0],["Me preocupo, pero mantengo mi dinero",1],["Me quedo tranquilo y no hago nada",2]] },
+  { id:"B3", dim:"B",
+    text:"Si una de sus inversiones acumula ganancias importantes, ¿cómo reaccionaría?",
+    opts:[["La vendo de inmediato para asegurar la ganancia",0],["Vendo una parte y mantengo el resto",1],["Me quedo tranquilo y no hago nada",2]] },
+];
+
+/* =====================================================================
+   2. PERFILES Y REGLAS
+   ===================================================================== */
+const PROFILES = [
+  { key:"conservador", name:"Conservador", min:0,  max:34,
+    what:"Su prioridad es preservar el capital y mantener liquidez. Acepta rentabilidades bajas a cambio de estabilidad y de poder disponer del dinero cuando lo necesite.",
+    assets:["Depósitos a plazo y fondos de mercado monetario","Renta fija de corto plazo y alta calidad crediticia","Renta variable acotada, en torno a 0–20% del portafolio"],
+    traits:["Horizonte corto o necesidad de retiros frecuentes","Baja tolerancia o baja capacidad para absorber pérdidas","Valora la certeza del resultado sobre el potencial de ganancia"] },
+  { key:"moderado", name:"Moderado", min:35, max:54,
+    what:"Busca un equilibrio entre crecimiento y estabilidad. Tolera fluctuaciones moderadas si a cambio obtiene un rendimiento superior al de instrumentos de ahorro tradicionales.",
+    assets:["Base de renta fija diversificada, de mediano plazo","Renta variable en torno a 20–40% del portafolio","Fondos balanceados o de asignación mixta"],
+    traits:["Horizonte de mediano plazo (3–7 años)","Tolerancia y capacidad de riesgo en niveles intermedios","Reacciona con cautela, pero no con pánico, ante caídas"] },
+  { key:"moderado-agresivo", name:"Moderado-Agresivo", min:55, max:74,
+    what:"Orienta el portafolio al crecimiento y acepta volatilidad significativa en el camino. Entiende que las caídas temporales son parte del proceso de obtener mayores retornos.",
+    assets:["Renta variable en torno a 50–70% del portafolio, diversificada por región y sector","Renta fija como amortiguador, con algo de crédito corporativo","Exposición selectiva a activos alternativos"],
+    traits:["Horizonte largo (7 años o más)","Alta tolerancia y capacidad financiera para sostener pérdidas","Experiencia previa con instrumentos de riesgo"] },
+  { key:"agresivo", name:"Agresivo", min:75, max:100,
+    what:"Busca maximizar el crecimiento del capital en el largo plazo y está dispuesto a aceptar pérdidas temporales de gran magnitud para lograrlo.",
+    assets:["Renta variable en torno a 80–100% del portafolio","Mercados emergentes, empresas de menor capitalización y sectores de alto crecimiento","Activos alternativos y, eventualmente, instrumentos con apalancamiento"],
+    traits:["Horizonte muy largo (más de 10 años) y sin necesidad de retiros","Alta capacidad financiera y sólido respaldo de liquidez fuera de la inversión","Disciplina para no vender en las caídas"],
+    caution:"Un portafolio agresivo puede caer entre 30% y 50% en una crisis de mercado, y tardar varios años en recuperarse. Este perfil solo es apropiado si usted puede mantener la inversión durante ese período sin necesitar el dinero y sin cambiar de estrategia." },
+];
+
+/* Reglas de tope: la capacidad y el horizonte limitan el perfil, aunque
+   la tolerancia declarada sea alta. Índice 0 = Conservador … 3 = Agresivo. */
+const CAPS = [
+  { test:(a,d)=>a.H1===0, cap:0, why:"necesita el dinero en menos de 1 año; el horizonte limita el perfil a Conservador." },
+  { test:(a,d)=>a.H1===1, cap:1, why:"necesita el dinero dentro de 1 a 3 años; el horizonte limita el perfil a Moderado." },
+  { test:(a,d)=>a.C1===0, cap:1, why:"este dinero representa más del 75% de su patrimonio; la capacidad de riesgo limita el perfil a Moderado." },
+  { test:(a,d)=>a.C4===0, cap:1, why:"no cuenta con un fondo de emergencia fuera de esta inversión; la capacidad de riesgo limita el perfil a Moderado." },
+  { test:(a,d)=>d.C<35,   cap:1, why:"su capacidad financiera de absorber pérdidas es baja (patrimonio comprometido, deudas o poca liquidez); el perfil se limita a Moderado." },
+  { test:(a,d)=>d.K<30,   cap:1, why:"su experiencia y conocimiento financiero son bajos; por idoneidad, el perfil se limita a Moderado." },
+  { test:(a,d)=>a.S1===0, cap:2, why:"sus ingresos futuros son inciertos; el portafolio debe conservar liquidez, lo que limita el perfil a Moderado-Agresivo." },
+];
+
+/* =====================================================================
+   3. MOTOR DE PUNTUACIÓN (función pura: respuestas → resultado)
+   answers: { H1: índiceDeOpción, ... }
+   ===================================================================== */
+function scoreProfile(answers){
+  const dims = {};
+  DIMENSIONS.forEach(D=>{
+    const qs = QUESTIONS.filter(q=>q.dim===D.id);
+    const got = qs.reduce((s,q)=>s+q.opts[answers[q.id]][1],0);
+    const max = qs.reduce((s,q)=>s+Math.max(...q.opts.map(o=>o[1])),0);
+    dims[D.id] = Math.round(100*got/max);
+  });
+  const total = Math.round(DIMENSIONS.reduce((s,D)=>s+D.weight*dims[D.id],0));
+  const rawIdx = PROFILES.findIndex(p=>total>=p.min && total<=p.max);
+  let idx = rawIdx, reasons = [];
+  CAPS.forEach(r=>{ if(r.test(answers,dims) && r.cap<idx){ idx=r.cap; reasons.push(r.why);} else if(r.test(answers,dims) && r.cap<rawIdx){ reasons.push(r.why);} });
+  reasons = [...new Set(reasons)];
+  return { total, dims, rawIdx, idx, capped: idx<rawIdx, reasons, profile: PROFILES[idx] };
+}
+
+/* =====================================================================
+   4. INTERFAZ
+   ===================================================================== */
+const answers = {};
+let step = -1;                       // -1 = portada, 0..5 = dimensiones, 6 = resultado
+const sheet = document.getElementById("sheet");
+const indexEl = document.getElementById("index");
+window.perfilResultado = null;       // punto de extensión para la Tarea 2
+
+function renderIndex(){
+  indexEl.innerHTML = DIMENSIONS.map((D,i)=>`<li class="${i<step?'done':''} ${i===step?'active':''}"><code>${D.id}</code><span>${D.name}</span></li>`).join("")
+    + `<li class="${step===6?'active':''}"><code>R</code><span>Resultado</span></li>`;
+}
+
+function renderCover(){
+  sheet.innerHTML = `
+    <div class="eyebrow">Antes de comenzar</div>
+    <h2>Conozcamos qué tipo de inversionista es usted.</h2>
+    <p class="lede">Dieciocho preguntas, agrupadas en seis dimensiones, para determinar un perfil que oriente cómo debería invertirse este dinero. Le tomará alrededor de cinco minutos. No hay respuestas correctas: conteste pensando en lo que realmente haría.</p>
+    <p class="lede">Al final verá su perfil, una explicación de lo que significa y el detalle de cómo se calculó.</p>
+    <div class="nav"><span></span><button class="btn" id="start">Comenzar</button></div>`;
+  document.getElementById("start").onclick=()=>{step=0;render();};
+}
+
+function renderStep(){
+  const D = DIMENSIONS[step];
+  const qs = QUESTIONS.filter(q=>q.dim===D.id);
+  sheet.innerHTML = `
+    <div class="eyebrow">Dimensión ${step+1} de ${DIMENSIONS.length}</div>
+    <h2>${D.name}</h2>
+    <p class="lede">${D.intro}</p>
+    ${qs.map(q=>`
+      <fieldset class="q" id="q-${q.id}">
+        <div class="code">${q.id}</div>
+        <div class="text">${q.text}</div>
+        ${q.hint?`<p class="hint">${q.hint}</p>`:""}
+        <div class="opts">
+          ${q.opts.map((o,i)=>`
+            <label class="opt ${answers[q.id]===i?'on':''}">
+              <input type="radio" name="${q.id}" value="${i}" ${answers[q.id]===i?'checked':''}>
+              <span class="k">${String.fromCharCode(65+i)}</span><span>${o[0]}</span>
+            </label>`).join("")}
+        </div>
+      </fieldset>`).join("")}
+    <div class="nav">
+      <button class="btn ghost" id="back">${step===0?'Volver al inicio':'Anterior'}</button>
+      <span class="warn" id="warn">Responda todas las preguntas para continuar.</span>
+      <button class="btn" id="next">${step===DIMENSIONS.length-1?'Ver mi perfil':'Continuar'}</button>
+    </div>`;
+  sheet.querySelectorAll("input[type=radio]").forEach(r=>{
+    r.addEventListener("change",e=>{
+      answers[e.target.name]=Number(e.target.value);
+      const fs=document.getElementById("q-"+e.target.name);
+      fs.classList.remove("missing");
+      fs.querySelectorAll(".opt").forEach(l=>l.classList.toggle("on",l.querySelector("input").checked));
+      document.getElementById("warn").classList.remove("show");
+    });
+  });
+  document.getElementById("back").onclick=()=>{step--;render();};
+  document.getElementById("next").onclick=()=>{
+    const missing = qs.filter(q=>answers[q.id]===undefined);
+    if(missing.length){
+      missing.forEach(q=>document.getElementById("q-"+q.id).classList.add("missing"));
+      document.getElementById("warn").classList.add("show");
+      document.getElementById("q-"+missing[0].id).scrollIntoView({behavior:"smooth",block:"center"});
+      return;
+    }
+    step++; render();
+  };
+}
+
+function renderResult(){
+  const R = scoreProfile(answers);
+  window.perfilResultado = { perfil:R.profile.key, puntaje:R.total, dimensiones:R.dims, respuestas:{...answers} };
+  const P = R.profile;
+  sheet.innerHTML = `
+    <div class="result">
+      <div class="eyebrow">Su perfil de inversionista</div>
+      <div class="profile-name">${P.name}</div>
+      <div class="scale">${PROFILES.map((p,i)=>`<div class="${i===R.idx?'hit':''}">${p.name}</div>`).join("")}</div>
+      <p class="marker">Puntaje ponderado: <b>${R.total} / 100</b>${R.capped?` · Rango del puntaje: <b>${PROFILES[R.rawIdx].name}</b>, ajustado por reglas de capacidad`:""}</p>
+
+      <div class="two">
+        <div class="desc">
+          <h3>Qué significa</h3>
+          <p>${P.what}</p>
+          <h3>Activos apropiados</h3>
+          <ul>${P.assets.map(a=>`<li>${a}</li>`).join("")}</ul>
+          <h3>Características que lo definen</h3>
+          <ul>${P.traits.map(t=>`<li>${t}</li>`).join("")}</ul>
+          ${P.caution?`<div class="caution"><b>Advertencia sobre volatilidad.</b> ${P.caution}</div>`:""}
+          ${R.capped?`<div class="cap"><b>Por qué se ajustó su perfil.</b> Su puntaje total correspondía a un perfil ${PROFILES[R.rawIdx].name}, pero ${R.reasons.map(r=>r).join(" Además, ")}</div>`:""}
+        </div>
+        <div class="breakdown">
+          <h4>Cómo se calculó</h4>
+          ${DIMENSIONS.map(D=>`
+            <div class="bar">
+              <span>${D.short} <span class="w">×${D.weight.toFixed(2)}</span></span>
+              <span class="track"><span class="fill" style="width:${R.dims[D.id]}%"></span></span>
+              <span class="n">${R.dims[D.id]}</span>
+            </div>`).join("")}
+          <div class="total"><span>Suma ponderada</span><span>${R.total}</span></div>
+          <p style="font-size:13px;color:var(--ink-2);margin-top:14px">Cada dimensión se mide de 0 a 100 y se multiplica por su peso. Rangos: Conservador 0–34, Moderado 35–54, Moderado-Agresivo 55–74, Agresivo 75–100. El horizonte, la capacidad y el conocimiento actúan además como límites: pueden bajar el perfil, nunca subirlo.</p>
+        </div>
+      </div>
+
+      <div class="nav">
+        <button class="btn ghost" id="redo">Responder de nuevo</button>
+        <button class="btn ghost" id="review">Revisar mis respuestas</button>
+      </div>
+      <p class="disclaimer">Este cuestionario es una herramienta académica desarrollada para el curso Administración de Portafolio Avanzada. El perfil obtenido es orientativo y no constituye una recomendación de inversión.</p>
+    </div>`;
+  document.getElementById("redo").onclick=()=>{Object.keys(answers).forEach(k=>delete answers[k]);step=-1;render();};
+  document.getElementById("review").onclick=()=>{step=0;render();};
+}
+
+function render(){
+  renderIndex();
+  window.scrollTo({top:0});
+  if(step<0) renderCover();
+  else if(step<DIMENSIONS.length) renderStep();
+  else renderResult();
+}
+render();
+</script>
+</body>
+</html>
